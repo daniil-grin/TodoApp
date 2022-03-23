@@ -26,9 +26,9 @@ class TodoController extends AbstractController
     }
 
     /**
-     * @Route("/read", name="api_todo_read")
+     * @Route("/read", name="api_todo_read", methods={"GET"})
      */
-    public function index()
+    public function index(): JsonResponse
     {
         $todos = $this->todoRepository->findAll();
 
@@ -41,7 +41,7 @@ class TodoController extends AbstractController
     }
 
     /**
-     * @Route("/create", name="api_todo_create")
+     * @Route("/create", name="api_todo_create", methods={"POST"})
      * @param Request $request
      * @return JsonResponse|void
      */
@@ -53,36 +53,56 @@ class TodoController extends AbstractController
 
         $todo->setName($content->name);
 
-        try{
+        try {
             $this->entityManager->persist($todo);
             $this->entityManager->flush();
             return $this->json([
                 'todo' => $todo->toArray()
             ]);
         } catch (\Exception $exception) {
-            // erroe
+            // error
         }
     }
 
     /**
-     * @Route("/update/{id}", name="api_todo_update")
+     * @Route("/update/{id}", name="api_todo_update", methods={"PUT"})
      * @param Request $request
-     * @return JsonResponse|void
+     * @param Todo $todo
+     * @return JsonResponse
      */
-    public function update(Request $request, Todo $todo)
+    public function update(Request $request, Todo $todo): JsonResponse
     {
         $content = json_decode($request->getContent());
 
         $todo->setName($content->name);
 
-        try{
+        try {
             $this->entityManager->flush();
         } catch (\Exception $exception) {
-            // erroe
+            // error
         }
 
         return $this->json([
             'massage' => 'todo has been updated'
+        ]);
+    }
+
+    /**
+     * @Route("/delete/{id}", name="api_todo_delete", methods={"DELETE"})
+     * @param Todo $todo
+     * @return JsonResponse
+     */
+    public function delete(Todo $todo): JsonResponse
+    {
+        try {
+            $this->entityManager->remove($todo);
+            $this->entityManager->flush();
+        } catch (\Exception $exception) {
+            // error
+        }
+
+        return $this->json([
+            'massage' => 'todo has been deleted'
         ]);
     }
 }
