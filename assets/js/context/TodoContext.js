@@ -7,24 +7,24 @@ class TodoContextProvider extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            todos: []
-        }
+            todos: [],
+            message: {},
+        };
         this.readTodo();
     }
 
     //fetch
 
     //read
-
     readTodo() {
         axios.get('/api/todo/read')
             .then(response => {
                 this.setState({
-                    todos: response.data
-                })
+                    todos: response.data,
+                });
             }).catch(error => {
-            console.log(error);
-        })
+            console.error(error);
+        });
     }
 
     //create
@@ -32,49 +32,74 @@ class TodoContextProvider extends Component {
         event.preventDefault();
         axios.post('/api/todo/create', todo)
             .then(response => {
-                let data = [...this.state.todos];
-                data.push(response.data.todo);
-                this.setState({
-                    todos: data
-                })
+                if (response.data.message.level === 'success') {
+                    let data = [...this.state.todos];
+                    data.push(response.data.todo);
+                    this.setState({
+                        todos: data,
+                        message: response.data.message,
+                    });
+                } else {
+                    this.setState({
+                        message: response.data.message,
+                    });
+                }
             }).catch(error => {
-            console.log(error);
-        })
+            console.error(error);
+        });
+
     }
 
     //update
     updateTodo(data) {
         axios.put('/api/todo/update/' + data.id, data)
             .then(response => {
-                let todos = [...this.state.todos];
-                let todo = todos.find(todo => {
-                    return todo.id === data.id;
-                })
+                if (response.data.message.level === 'error') {
+                    this.setState({
+                        message: response.data.message,
+                    });
+                } else {
+                    let todos = [...this.state.todos];
+                    let todo = todos.find(todo => {
+                        return todo.id === data.id;
+                    });
 
-                todo.name = data.name;
+                    todo.name = data.name;
 
-                this.setState({
-                    todos: todos
-                })
+                    this.setState({
+                        todos: todos,
+                        message: response.data.message,
+                    });
+                }
             }).catch(error => {
-            console.log(error);
-        })
+            console.error(error);
+        });
     }
 
     //delete
     deleteTodo(data) {
         axios.delete('/api/todo/delete/' + data.id)
             .then(response => {
-                let todos = [...this.state.todos];
-                let todo = todos.find(todo => {
-                    return todo.id === data.id;
-                })
-                todos.splice(todos.indexOf(todo), 1);
-                this.setState({
-                    todos: todos
-                })
+                if (response.data.message.level === 'error') {
+                    this.setState({
+                        message: response.data.message,
+                    });
+                } else {
+                    //message
+                    let todos = [...this.state.todos];
+                    let todo = todos.find(todo => {
+                        return todo.id === data.id;
+                    });
+
+                    todos.splice(todos.indexOf(todo), 1);
+
+                    this.setState({
+                        todos: todos,
+                        message: response.data.message
+                    });
+                }
             }).catch(error => {
-            console.log(error);
+            console.error(error);
         });
     }
 
@@ -84,7 +109,8 @@ class TodoContextProvider extends Component {
                 ...this.state,
                 createTodo: this.createTodo.bind(this),
                 updateTodo: this.updateTodo.bind(this),
-                deleteTodo: this.deleteTodo.bind(this)
+                deleteTodo: this.deleteTodo.bind(this),
+                setMessage: (message) => this.setState({message: message}),
             }}>
                 {this.props.children}
             </TodoContext.Provider>

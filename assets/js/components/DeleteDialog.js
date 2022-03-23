@@ -6,14 +6,12 @@ import {TodoContext} from "../context/TodoContext";
 
 function DeleteDialog(props) {
     const hide = () => {
-        {
-            props.setDeleteConfirmationIsShow(false)
-        }
-    }
+        props.setDeleteConfirmationIsShown(false);
+    };
 
     const context = useContext(TodoContext);
     return (
-        <Dialog onClose={hide} fullWidth={true} maxWidth="sm" open={props.open}>
+        <Dialog onClose={hide} fullWidth={true} maxWidth='sm' open={props.open}>
             <DialogTitle>Are you sure you wish to delete this to-do?</DialogTitle>
             <DialogContent>
                 {props.todo.name}
@@ -23,7 +21,9 @@ function DeleteDialog(props) {
                 <Button onClick={() => {
                     context.deleteTodo({id: props.todo.id, name: props.todo.name});
                     hide();
-                }}>Delete</Button>
+                }}>
+                    Delete
+                </Button>
             </DialogActions>
         </Dialog>
     );
@@ -31,8 +31,10 @@ function DeleteDialog(props) {
 
 DeleteDialog.propTypes = {
     open: PropTypes.bool.isRequired,
-    setDeleteConfirmationIsShow: PropTypes.func,
-    todo: PropTypes.object
-}
-
+    setDeleteConfirmationIsShown: PropTypes.func.isRequired,
+    todo: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        name: PropTypes.string.isRequired,
+    }),
+};
 export default DeleteDialog;
