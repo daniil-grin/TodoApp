@@ -63,4 +63,26 @@ class TodoController extends AbstractController
             // erroe
         }
     }
+
+    /**
+     * @Route("/update/{id}", name="api_todo_update")
+     * @param Request $request
+     * @return JsonResponse|void
+     */
+    public function update(Request $request, Todo $todo)
+    {
+        $content = json_decode($request->getContent());
+
+        $todo->setName($content->name);
+
+        try{
+            $this->entityManager->flush();
+        } catch (\Exception $exception) {
+            // erroe
+        }
+
+        return $this->json([
+            'massage' => 'todo has been updated'
+        ]);
+    }
 }
